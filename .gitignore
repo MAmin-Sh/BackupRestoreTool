@@ -217,4 +217,4 @@ marimo/_lsp/
 __marimo__/
 
 backup/
-/idea/
+.idea/
