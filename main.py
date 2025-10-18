@@ -112,7 +112,7 @@ class BackupRestoreTool(QWidget):
 
     def select_backup_file(self):
         path, _ = QFileDialog.getSaveFileName(
-            self, "انتخاب فایل پشتیبان", "", "Backup Files (*.dump)"
+            self, "انتخاب فایل پشتیبان", "", "All File (*)"
         )
         if path:
             self.backup_file_input.setText(path)
@@ -160,7 +160,7 @@ class BackupRestoreTool(QWidget):
             backup_folder, f"{dbname}_{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}.dump"
         )
         path, _ = QFileDialog.getSaveFileName(
-            self, "انتخاب فایل پشتیبان", default_backup_file, "Backup Files (*.dump)"
+            self, "انتخاب فایل پشتیبان", default_backup_file, "All File (*)"
         )
         if not path:
             path = default_backup_file
@@ -182,7 +182,7 @@ class BackupRestoreTool(QWidget):
             return
 
         backup_file, _ = QFileDialog.getOpenFileName(
-            self, "انتخاب فایل پشتیبان برای بازگردانی", "", "Backup Files (*.dump)"
+            self, "انتخاب فایل پشتیبان برای بازگردانی", "", "All File (*)"
         )
         if not backup_file:
             return

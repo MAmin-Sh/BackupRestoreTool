@@ -57,3 +57,33 @@ connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection re
 [2025-09-25 12:47:15] Backup of hrm_db done successfully: C:/Users/Amin Shirinkar/Desktop/aaaaaaaaaaaaaaaaa2-47-06.dump
 [2025-09-25 12:47:33] Database hrm_db dropped ✅
 [2025-09-25 12:47:39] Restore of hrm_db done successfully from C:/Users/Amin Shirinkar/Desktop/aaaaaaaaaaaaaaaaa2-47-06.dump
+[2025-09-27 12:24:46] Database solar_db dropped ✅
+[2025-09-27 12:24:48] Database solar_db dropped ✅
+[2025-09-27 12:24:54] Database solar_db dropped ✅
+[2025-09-27 12:25:04] Database solar_db dropped ✅
+[2025-09-27 12:26:02] Database solar_db dropped ✅
+[2025-09-27 12:27:02] Error creating DB solar_db: database "solar_db" already exists
+
+[2025-09-27 12:27:03] Database solar_db dropped ✅
+[2025-09-27 12:27:09] Database solar_db dropped ✅
+[2025-09-27 12:28:18] Database solar_db dropped ✅
+[2025-09-27 12:28:27] Restore failed: PostgreSQL tools missing ['C:\\Program Files\\PostgreSQL\\15\\bin\\pg_restore.exe', 'C:\\Program Files\\PostgreSQL\\15\\bin\\psql.exe']
+[2025-09-27 12:30:11] Restore failed converting to SQL: Command '['C:/Program Files/PostgreSQL/17/bin\\pg_restore.exe', '-h', 'localhost', '-U', 'postgres', '-f', 'D:\\Project\\Django\\Projects\\BackupRestoreTool\\solar_db_temp_restore.sql', 'C:/Users/Amin Shirinkar/Desktop/solar-panel_شششششششششششششششششششش10-53-58.backup']' returned non-zero exit status 1.
+[2025-09-27 12:30:36] Restore of solar_db done successfully from C:/Users/Amin Shirinkar/Desktop/solar.backup
+[2025-09-27 12:41:33] Database solar_db dropped ✅
+[2025-09-27 12:42:50] Restore of solar_db done successfully from C:/Users/Amin Shirinkar/Desktop/solar.backup
+[2025-10-02 10:27:53] Backup failed: pg_dump not found at C:\Program Files\PostgreSQL\15\bin\pg_dump.exe
+[2025-10-02 10:29:17] Database hrm_db dropped ✅
+[2025-10-02 10:29:25] Restore of hrm_db done successfully from D:/Project/Django/Projects/Hrm/hrm_db_2025-10-02_10-26-26.dump
+[2025-10-11 18:25:35] Database solar_db dropped ✅
+[2025-10-11 18:26:03] Restore failed: PostgreSQL tools missing ['C:\\Program Files\\PostgreSQL\\15\\bin\\pg_restore.exe', 'C:\\Program Files\\PostgreSQL\\15\\bin\\psql.exe']
+[2025-10-11 18:26:50] Restore of solar_db done successfully from C:/Users/Amin Shirinkar/Desktop/solar-panel_backup_2025-10-11_06-29-37.backup
+[2025-10-14 20:00:09] Backup of hrm_db done successfully: D:/Project/Django/Projects/BackupRestoreTool/backup/hrm_db_2025-09-25_11-48-17.dump
+[2025-10-14 20:00:21] Database hrm_db dropped ✅
+[2025-10-14 20:00:33] Restore of hrm_db done successfully from D:/Project/Django/Projects/BackupRestoreTool/backup/hrm_db_2025-09-25_11-48-17.dump
+[2025-10-14 20:01:40] Backup failed: pg_dump not found at C:\Program Files\PostgreSQL\15\bin\pg_dump.exe
+[2025-10-14 20:01:55] Database hrm_db dropped ✅
+[2025-10-14 20:03:37] Restore of hrm_db done successfully from D:/Project/Django/Projects/BackupRestoreTool/backup/hrm_db_2025-09-25_11-48-17.dump
+[2025-10-14 20:06:16] Database hrm_db dropped ✅
+[2025-10-16 19:27:12] Database hrm_db dropped ✅
+[2025-10-16 19:28:10] Database hrm_db dropped ✅
