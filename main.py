@@ -1,7 +1,9 @@
-import os
-import sys
 import re
 import subprocess
+import sys
+import os
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtGui import QIcon
 import datetime
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -23,7 +25,7 @@ def write_log(msg):
 class BackupRestoreTool(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ابزار حرفه‌ای پشتیبان‌گیری و بازگردانی PostgreSQL")
+        self.setWindowTitle("ابزار پشتیبان‌گیری و بازگردانی PostgreSQL")
         self.setFixedSize(750, 480)
         self.setLayoutDirection(Qt.RightToLeft)
         self.font = QFont("B Nazanin", 10)
@@ -54,13 +56,22 @@ class BackupRestoreTool(QWidget):
 
         # Inputs
         self.host_input = QLineEdit("localhost")
-        self.port_input = QLineEdit()
+        self.port_input = QLineEdit("5432")
         self.db_input = QLineEdit()
         self.user_input = QLineEdit("postgres")
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
         self.backup_file_input = QLineEdit()
         self.bin_path_input = QLineEdit()
+        self.backup_file_input.setReadOnly(True)
+        self.backup_file_input.textChanged.connect(
+            lambda text: self.backup_file_input.setToolTip(text)
+        )
+
+        self.bin_path_input.setReadOnly(True)
+        self.bin_path_input.textChanged.connect(
+            lambda text: self.bin_path_input.setToolTip(text)
+        )
 
         inputs = [
             self.host_input, self.port_input, self.db_input, self.user_input,
@@ -81,11 +92,11 @@ class BackupRestoreTool(QWidget):
         file_btn.clicked.connect(self.select_backup_file)
         layout.addWidget(file_btn, 5, 2)
 
-        backup_btn = QPushButton("تهیه پشتیبان حرفه‌ای")
+        backup_btn = QPushButton("تهیه پشتیبان")
         backup_btn.setFont(self.font)
         backup_btn.clicked.connect(self.run_backup)
 
-        restore_btn = QPushButton("بازگردانی امن")
+        restore_btn = QPushButton("بازگردانی")
         restore_btn.setFont(self.font)
         restore_btn.clicked.connect(self.run_restore)
 
@@ -119,7 +130,7 @@ class BackupRestoreTool(QWidget):
 
     def select_bin_path(self):
         folder = QFileDialog.getExistingDirectory(
-            self, "انتخاب مسیر فایل‌های اجرایی PostgreSQL"
+            self, "انتخاب مسیر دیتابیس PostgreSQL"
         )
         if folder:
             self.bin_path_input.setText(folder)
@@ -142,7 +153,12 @@ class BackupRestoreTool(QWidget):
 
         bin_path = self.bin_path_input.text().strip()
         if not bin_path:
-            bin_path = r"C:\Program Files\PostgreSQL\15\bin"
+            for i in range(11, 25):
+                bin_path = fr"C:\Program Files\PostgreSQL\{i}\bin"
+                print(bin_path)
+                pg_dump_exe = os.path.join(bin_path, "pg_dump.exe" if os.name == "nt" else "pg_dump")
+                if os.path.isfile(pg_dump_exe):
+                    break
 
         pg_dump_exe = os.path.join(bin_path, "pg_dump.exe" if os.name == "nt" else "pg_dump")
         if not os.path.isfile(pg_dump_exe):
@@ -170,6 +186,7 @@ class BackupRestoreTool(QWidget):
             subprocess.run([pg_dump_exe] + self._conn_args() + ["-F", "c", "-f", path, dbname],
                            check=True, env=env)
             QMessageBox.information(self, "موفقیت", f"بکاپ با موفقیت انجام شد!\n{path}")
+            self.bin_path_input.setToolTip("سیر فایل بکاپ:" + bin_path)
             write_log(f"Backup of {dbname} done successfully: {path}")
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "خطا", f"بکاپ شکست خورد!\n{e}")
@@ -189,7 +206,15 @@ class BackupRestoreTool(QWidget):
 
         bin_path = self.bin_path_input.text().strip()
         if not bin_path:
-            bin_path = r"C:\Program Files\PostgreSQL\15\bin"
+            # bin_path = r"C:\Program Files\PostgreSQL\15\bin"
+            for i in range(11, 25):
+                bin_path = fr"C:\Program Files\PostgreSQL\{i}\bin"
+                print(bin_path)
+                pg_restore_exe = os.path.join(bin_path, "pg_restore.exe" if os.name == "nt" else "pg_restore")
+                psql_exe = os.path.join(bin_path, "psql.exe" if os.name == "nt" else "psql")
+                missing = [exe for exe in (pg_restore_exe, psql_exe) if not os.path.isfile(exe)]
+                if not missing:
+                    break
 
         pg_restore_exe = os.path.join(bin_path, "pg_restore.exe" if os.name == "nt" else "pg_restore")
         psql_exe = os.path.join(bin_path, "psql.exe" if os.name == "nt" else "psql")
@@ -240,7 +265,6 @@ class BackupRestoreTool(QWidget):
             if os.path.exists(temp_sql): os.remove(temp_sql)
             if os.path.exists(processed_sql): os.remove(processed_sql)
 
-
     def drop_db(self):
         dbname = self.db_input.text().strip()
         if not dbname:
@@ -260,7 +284,7 @@ class BackupRestoreTool(QWidget):
             cur.close()
             conn.close()
             QMessageBox.information(self, "موفقیت", f"Database {dbname} دراپ شد!")
-            write_log(f"Database {dbname} dropped ✅")
+            write_log(f"Database {dbname} dropped ")
         except Exception as e:
             QMessageBox.critical(self, "خطا", f"دراپ دیتابیس شکست خورد!\n{e}")
             print(f"Error dropping DB {dbname}: {e}")
@@ -284,14 +308,24 @@ class BackupRestoreTool(QWidget):
             cur.close()
             conn.close()
             QMessageBox.information(self, "موفقیت", f"Database {dbname} ساخته شد!")
-            print(f"Database {dbname} created ✅")
+            print(f"Database {dbname} created ")
         except Exception as e:
             QMessageBox.critical(self, "خطا", f"ساخت دیتابیس شکست خورد!\n{e}")
             write_log(f"Error creating DB {dbname}: {e}")
 
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = BackupRestoreTool()
+    icon_path = resource_path("data-recovery.ico")
+    window.setWindowIcon(QIcon(icon_path))
     window.show()
     sys.exit(app.exec_())
