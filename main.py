@@ -44,7 +44,7 @@ def register_custom_font(font_filename):
     return "Vazirmatn"
 
 
-FONT_FILE_NAME = "Vazirmatn-Regular.ttf"
+FONT_FILE_NAME = "LMU-Vazir.ttf"
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -74,7 +74,7 @@ TRANSLATIONS = {
         "file_placeholder": "مسیر فایل ذخیره یا بازیابی...",
         "btn_backup": "📥 تهیه پشتیبان (Backup)",
         "btn_restore": "📤 بازگردانی (Restore)",
-        "status_ready": "آماده به کار",
+        "status_ready": "v2.1.0",
         "terminal_title": "System Terminal Console (CMD)",
         "cmd_placeholder": "Type CMD command and press Enter...",
         "searching": "در حال جستجو...",
@@ -126,7 +126,7 @@ TRANSLATIONS = {
         "file_placeholder": "Select file path for backup or restore...",
         "btn_backup": "📥 Take Backup",
         "btn_restore": "📤 Restore Data",
-        "status_ready": "System Ready",
+        "status_ready": "v2.1.0",
         "terminal_title": "System Terminal Console (CMD)",
         "cmd_placeholder": "Type CMD command and press Enter...",
         "searching": "Searching...",
@@ -177,6 +177,7 @@ class BackupRestoreApp(ctk.CTk):
         self.f_console = ctk.CTkFont(family="Consolas", size=10)
 
         self.detected_pg_paths = {}
+        self.terminal_cwd = os.path.abspath(os.path.dirname(__file__))
 
         self.init_ui()
         self.update_ui_language()
@@ -459,7 +460,7 @@ class BackupRestoreApp(ctk.CTk):
             return
 
         self.cmd_input.delete(0, "end")
-        self.log_to_terminal(f"\nC:\\Users\\System> {command}")
+        self.log_to_terminal(f"\n{self.terminal_cwd}> {command}")
 
         if command.lower() in ["cls", "clear"]:
             self.terminal_box.configure(state="normal")
@@ -467,10 +468,26 @@ class BackupRestoreApp(ctk.CTk):
             self.terminal_box.configure(state="disabled")
             return
 
+        cd_match = re.match(r'^\s*cd\s+(.*)$', command, re.IGNORECASE)
+        if cd_match:
+            target = cd_match.group(1).strip().strip('"')
+            if not target or target == ".":
+                pass
+            else:
+                new_dir = target if os.path.isabs(target) else os.path.join(self.terminal_cwd, target)
+                new_dir = os.path.normpath(new_dir)
+                if os.path.isdir(new_dir):
+                    self.terminal_cwd = new_dir
+                    self.log_to_terminal(f"[INFO] Current directory changed to: {self.terminal_cwd}")
+                else:
+                    self.log_to_terminal(f"[ERROR] The system cannot find the path specified: {new_dir}")
+            return
+
         def _run_cmd():
             try:
                 result = subprocess.run(
-                    command, shell=True, capture_output=True, text=True, timeout=30
+                    command, shell=True, capture_output=True, text=True,
+                    timeout=30, cwd=self.terminal_cwd
                 )
                 if result.stdout:
                     self.log_to_terminal(result.stdout.strip())
@@ -539,10 +556,17 @@ class BackupRestoreApp(ctk.CTk):
             self.pg_version_combo.configure(values=version_names)
             self.pg_version_combo.set(version_names[0])
             self.log_to_terminal(f"[INFO] Detected {len(self.detected_pg_paths)} PostgreSQL installation(s).")
+            self._cd_terminal_to(self.detected_pg_paths[version_names[0]])
         else:
             self.pg_version_combo.configure(values=[self.t("no_version_found")])
             self.pg_version_combo.set(self.t("no_version_found"))
             self.log_to_terminal("[WARNING] No PostgreSQL installation detected automatically.")
+
+    def _cd_terminal_to(self, path):
+        if path and os.path.isdir(path) and os.path.normpath(path) != os.path.normpath(self.terminal_cwd):
+            self.terminal_cwd = os.path.normpath(path)
+            self.log_to_terminal(f"\n{self.terminal_cwd}> cd \"{self.terminal_cwd}\"")
+            self.log_to_terminal(f"[INFO] Terminal directory switched to: {self.terminal_cwd}")
 
     def _on_version_selected(self, choice):
         if choice in [self.t("add_custom_path"), self.t("no_version_found")]:
@@ -561,12 +585,15 @@ class BackupRestoreApp(ctk.CTk):
                     self.pg_version_combo.set(custom_label)
                     self.log_to_terminal(f"[INFO] Added custom bin path: {folder}")
                     messagebox.showinfo(self.t("msg_success"), self.t("custom_path_success"))
+                    self._cd_terminal_to(folder)
                 else:
                     self.log_to_terminal(f"[ERROR] Invalid bin path selected: {folder}")
                     messagebox.showerror(self.t("msg_error"), self.t("custom_path_error"))
                     self.detect_installed_pg_versions()
             else:
                 self.detect_installed_pg_versions()
+        elif choice in self.detected_pg_paths:
+            self._cd_terminal_to(self.detected_pg_paths[choice])
 
     def get_selected_bin_path(self):
         selected = self.pg_version_combo.get()
